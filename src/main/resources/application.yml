@@ -7,7 +7,7 @@ mybatis:
 spring:
   datasource:
     name: seckill
-    url: jdbc:mysql://localhost:3306/seckill
+    url: jdbc:mysql://localhost:3306/seckill2
     username: root
     password: lizhimysql
     type: com.alibaba.druid.pool.DruidDataSource
