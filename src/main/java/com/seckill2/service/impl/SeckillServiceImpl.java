@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 
+import com.seckill2.cache.RedisDao;
 import com.seckill2.dao.SeckillMapper;
 import com.seckill2.dao.SuccessKilledMapper;
 import com.seckill2.dto.ExposerDto;
@@ -41,9 +42,12 @@ public class SeckillServiceImpl implements SeckillService {
   @Autowired
   private SuccessKilledMapper successKilledMapper;
 
+  @Autowired
+  private RedisDao redisDao;
+
   @Override
   public List<SeckillDto> getSeckills() {
-    List<Seckill> seckills = seckillMapper.queryAll(0, Integer.MAX_VALUE);
+    List<Seckill> seckills = redisDao.getSeckillList();
 
     if (!CollectionUtils.isEmpty(seckills)) {
       // @formatter:off
@@ -58,7 +62,7 @@ public class SeckillServiceImpl implements SeckillService {
 
   @Override
   public SeckillDto getById(Integer seckillId) {
-    Seckill seckill = seckillMapper.selectByPrimaryKey(seckillId);
+    Seckill seckill = redisDao.getSeckill(seckillId);
 
     if (seckill == null) {
       return null;
