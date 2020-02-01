@@ -1,6 +1,7 @@
 package com.seckill2.dao;
 
 import java.util.Date;
+import java.util.List;
 
 import com.seckill2.model.Seckill;
 
@@ -19,5 +20,7 @@ public interface SeckillMapper {
   int updateByPrimaryKey(Seckill record);
 
   int reduceNumber(Integer seckillId, Date killTime);
+
+  List<Seckill> queryAll(int offset, int limit);
 
 }
