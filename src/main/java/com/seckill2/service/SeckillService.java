@@ -8,11 +8,8 @@ import com.seckill2.dto.SeckillExecution;
 import com.seckill2.exception.RepeatKillException;
 import com.seckill2.exception.SeckillCloseException;
 import com.seckill2.exception.SeckillException;
-import com.seckill2.model.Seckill;
 
 public interface SeckillService {
-
-  Seckill test();
 
   List<SeckillDto> getSeckills();
 

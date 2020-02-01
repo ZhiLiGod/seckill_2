@@ -42,11 +42,6 @@ public class SeckillServiceImpl implements SeckillService {
   private SuccessKilledMapper successKilledMapper;
 
   @Override
-  public Seckill test() {
-    return seckillMapper.selectByPrimaryKey(1);
-  }
-
-  @Override
   public List<SeckillDto> getSeckills() {
     List<Seckill> seckills = seckillMapper.queryAll(0, Integer.MAX_VALUE);
 
