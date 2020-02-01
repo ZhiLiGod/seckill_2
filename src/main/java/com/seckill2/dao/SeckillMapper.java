@@ -3,6 +3,8 @@ package com.seckill2.dao;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.seckill2.model.Seckill;
 
 public interface SeckillMapper {
@@ -19,8 +21,8 @@ public interface SeckillMapper {
 
   int updateByPrimaryKey(Seckill record);
 
-  int reduceNumber(Integer seckillId, Date killTime);
+  int reduceNumber(@Param("seckillId") Integer seckillId, @Param("killTime") Date killTime);
 
-  List<Seckill> queryAll(int offset, int limit);
+  List<Seckill> queryAll(@Param("offset") int offset, @Param("limit") int limit);
 
 }
