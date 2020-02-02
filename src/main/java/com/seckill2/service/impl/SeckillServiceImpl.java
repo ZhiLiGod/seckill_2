@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,20 +121,21 @@ public class SeckillServiceImpl implements SeckillService {
     try {
       // reduce stock, save purchase record
       Date now = new Date();
-      int updateCount = seckillMapper.reduceNumber(seckillId, now);
 
-      if (updateCount <= 0) {
-        throw new SeckillCloseException("Seckill closed");
+      SuccessKilled successKilled = new SuccessKilled();
+      successKilled.setSeckillId(Long.valueOf(seckillId));
+      successKilled.setUserPhone(userPhone);
+      successKilled.setCreateTime(now);
+      successKilled.setState(SeckillState.SUCCESS.getState().byteValue());
+      int insertCount = successKilledMapper.insertSelective(successKilled);
+
+      if (insertCount <= 0) {
+        throw new RepeatKillException("Repeat Seckilled");
       } else {
-        SuccessKilled successKilled = new SuccessKilled();
-        successKilled.setSeckillId(Long.valueOf(seckillId));
-        successKilled.setUserPhone(userPhone);
-        successKilled.setCreateTime(now);
-        successKilled.setState(SeckillState.SUCCESS.getState().byteValue());
-        int insertCount = successKilledMapper.insertSelective(successKilled);
+        int updateCount = seckillMapper.reduceNumber(seckillId, now);
 
-        if (insertCount <= 0) {
-          throw new RepeatKillException("Repeat Seckilled");
+        if (updateCount <= 0) {
+          throw new SeckillCloseException("Seckill closed");
         } else {
           // @formatter:off
           return SeckillExecution.builder()
@@ -150,6 +153,49 @@ public class SeckillServiceImpl implements SeckillService {
     } catch (Exception e) {
       log.error("Error when Seckilling", e);
       throw new SeckillException("Seckill Inner Error" + e.getMessage());
+    }
+  }
+
+  @Override
+  public SeckillExecution executeSeckillByProcedure(Integer seckillId, Long userPhone, String md5) throws SeckillException {
+    validateMd5(md5, seckillId);
+    Date killTime = new Date();
+    Map<String, Object> paramMap = new HashMap<>();
+    paramMap.put("seckillId", Long.valueOf(seckillId));
+    paramMap.put("phone", userPhone);
+    paramMap.put("killTime", killTime);
+    paramMap.put("result", null);
+
+    try {
+      seckillMapper.killByProcedure(paramMap);
+      Integer result = (Integer) paramMap.get("result");
+
+      if (SeckillState.SUCCESS.getState() == result) {
+        // @formatter:off
+        return SeckillExecution.builder()
+            .seckillId(seckillId)
+            .state(SeckillState.SUCCESS.getState())
+            .stateInfo(SeckillState.SUCCESS.getText())
+            .build();
+        // @formatter:on
+      } else {
+        // @formatter:off
+        return SeckillExecution.builder()
+            .seckillId(seckillId)
+            .state(SeckillState.FAILED.getState())
+            .stateInfo(SeckillState.FAILED.getText())
+            .build();
+        // @formatter:on
+      }
+    } catch (Exception e) {
+      log.error("Error when seckilling", e);
+      // @formatter:off
+      return SeckillExecution.builder()
+          .seckillId(seckillId)
+          .state(SeckillState.FAILED.getState())
+          .stateInfo(SeckillState.FAILED.getText())
+          .build();
+      // @formatter:on
     }
   }
 

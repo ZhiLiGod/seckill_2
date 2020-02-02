@@ -2,6 +2,7 @@ package com.seckill2.dao;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -24,5 +25,11 @@ public interface SeckillMapper {
   int reduceNumber(@Param("seckillId") Integer seckillId, @Param("killTime") Date killTime);
 
   List<Seckill> queryAll(@Param("offset") int offset, @Param("limit") int limit);
+
+  /**
+   * use procedure to do seckill
+   * @param paramMap
+   */
+  void killByProcedure(Map<String, Object> paramMap);
 
 }
